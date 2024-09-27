@@ -2,8 +2,8 @@ import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
 PROXIES = {
-    'https' : f"http://{os.environ['PROXIES']}",
-    'http' : f"http://{os.environ['PROXIES']}",
+    'https' : f"http://{os.environ['PROXY']}",
+    'http' : f"http://{os.environ['PROXY']}",
 } if 'PROXIES' in os.environ else {}
 
 EMAIL_ADDRESS = os.environ['EMAIL_ADDRESS'] if 'EMAIL_ADDRESS' in os.environ else ''
