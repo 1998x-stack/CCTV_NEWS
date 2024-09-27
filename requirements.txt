@@ -5,7 +5,6 @@ jieba
 matplotlib
 pandas
 pke-zh
-pke
 requests
 schedule
 tqdm
