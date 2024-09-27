@@ -4,7 +4,7 @@ filelock==3.16.1
 jieba==0.42.1
 matplotlib==3.7.2
 pandas==1.5.3
-pke==2.0.0
+pke-zh
 Requests==2.32.3
 schedule==1.2.2
 tqdm==4.66.4
