@@ -24,6 +24,9 @@ def collect_news(day):
     try:
         video_data_collector = VideoDataCollector(start_date=day, end_date=day, proxies=PROXIES)
         collected_data = video_data_collector.collect_all_data()
+        if not collected_data:
+            logger.log_info(f"No data collected for {day}.")
+            return []
         logger.log_info(f"Collected data for {day}: {collected_data}")
         collected_domestic_broadcast_news = [data for data in collected_data if data['title'] == '国内联播快讯']
         modify_csv_and_jsonl(collected_data, DATA_CSV_PATH, DATA_JSONL_PATH)

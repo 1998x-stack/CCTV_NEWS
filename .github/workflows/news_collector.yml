@@ -6,7 +6,7 @@ on:
     branches:
       - main  # 当推送到 main 分支时触发工作流
   schedule:
-      - cron: '0 */4 * * *'
+      - cron: '0 */8 * * *'
 
 # 工作流
 jobs:

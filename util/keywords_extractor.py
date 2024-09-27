@@ -92,7 +92,45 @@ class KeywordExtractor:
         for word, score in keywords:
             if word in self.stopwords:
                 keywords.remove((word, score))
-        return {word.replace(' ', ''): score for word, score in keywords if word.replace(' ', '') not in self.stopwords}
+        keywords = {word.replace(' ', ''): score for word, score in keywords if word.replace(' ', '') not in self.stopwords}
+        return self.filter_keywords(keywords)
+
+    @staticmethod
+    def filter_keywords(keywords):
+        """过滤关键词，保留最长的关键词和最高分数
+        
+        Args:
+            keywords: 一个包含关键词及其分数的字典
+        
+        Returns:
+            一个新的字典，包含过滤后的关键词及其分数
+        """
+        filtered_keywords = {}
+
+        # 遍历关键词
+        for keyword, score in keywords.items():
+            # 如果当前关键词已经在过滤后的字典中，更新分数为最高分
+            if keyword not in filtered_keywords:
+                filtered_keywords[keyword] = score
+            else:
+                filtered_keywords[keyword] = max(filtered_keywords[keyword], score)
+
+            # 检查是否需要更新其他关键词
+            to_remove = []
+            for other_keyword in filtered_keywords.keys():
+                if keyword != other_keyword:
+                    if keyword in other_keyword:
+                        # 如果当前关键词是其他关键词的子串
+                        to_remove.append(keyword)  # 标记短关键词以供删除
+                    elif other_keyword in keyword:
+                        # 如果其他关键词是当前关键词的子串
+                        filtered_keywords[other_keyword] = max(filtered_keywords.get(other_keyword, 0), score)
+
+            for kw in to_remove:
+                if kw in filtered_keywords:
+                    del filtered_keywords[kw]
+
+        return filtered_keywords
 
     def _extract_tfidf(self, text: str, n_keywords: int) -> List[Tuple[str, float]]:
         """使用 TF-IDF 提取关键词。"""

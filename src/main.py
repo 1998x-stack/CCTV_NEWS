@@ -37,6 +37,14 @@ def main():
         os.path.join(
             BASIC_IMAGE_DIR,
             'all',
+            'keywords_trend'
+        ),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'all',
             'province'
         ),
         exist_ok=True
@@ -55,6 +63,14 @@ def main():
             BASIC_IMAGE_DIR,
             'domestic_broadcast_news',
             'keywords'
+        ),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'domestic_broadcast_news',
+            'keywords_trend'
         ),
         exist_ok=True
     )
@@ -88,6 +104,12 @@ def main():
         'keywords',
         f'keywords_png_all_14_{day_14_before}_{today}.png'
     )
+    top_keywords_trend_png_path_all_14 = os.path.join(
+        BASIC_IMAGE_DIR,
+        'all',
+        'keywords_trend',
+        f'top_keywords_trend_png_all_14_{day_14_before}_{today}.png'
+    )
     province_frequency_png_path_all_14 = os.path.join(
         BASIC_IMAGE_DIR,
         'all',
@@ -108,6 +130,7 @@ def main():
         n_keywords=40,
         result_data_path=result_data_path_all_14,
         keywords_png_path=keywords_png_path_all_14,
+        top_keywords_trend_png_path=top_keywords_trend_png_path_all_14,
         provinces_png_path=province_frequency_png_path_all_14,
         wordcloud_png_path=wordcloud_png_path_all_14,
     )
@@ -124,6 +147,12 @@ def main():
         'domestic_broadcast_news',
         'keywords',
         f'keywords_png_broadcast_14_{day_14_before}_{today}.png'
+    )
+    top_keywords_trend_png_path_broadcast_14 = os.path.join(
+        BASIC_IMAGE_DIR,
+        'domestic_broadcast_news',
+        'keywords_trend',
+        f'top_keywords_trend_png_broadcast_14_{day_14_before}_{today}.png'
     )
     province_frequency_png_path_broadcast_14 = os.path.join(
         BASIC_IMAGE_DIR,
@@ -145,6 +174,7 @@ def main():
         n_keywords=40,
         result_data_path=result_data_path_broadcast_14,
         keywords_png_path=keywords_png_path_broadcast_14,
+        top_keywords_trend_png_path=top_keywords_trend_png_path_broadcast_14,
         provinces_png_path=province_frequency_png_path_broadcast_14,
         wordcloud_png_path=wordcloud_png_path_broadcast_14,
     )
@@ -161,6 +191,12 @@ def main():
         'all',
         'keywords',
         f'keywords_png_all_3mon_{day_3mon_before}_{today}.png'
+    )
+    top_keywords_trend_png_path_all_3mon = os.path.join(
+        BASIC_IMAGE_DIR,
+        'all',
+        'keywords_trend',
+        f'top_keywords_trend_png_all_3mon_{day_3mon_before}_{today}.png'
     )
     province_frequency_png_path_all_3mon = os.path.join(
         BASIC_IMAGE_DIR,
@@ -182,6 +218,7 @@ def main():
         n_keywords=40,
         result_data_path=result_data_path_all_3mon,
         keywords_png_path=keywords_png_path_all_3mon,
+        top_keywords_trend_png_path=top_keywords_trend_png_path_all_3mon,
         provinces_png_path=province_frequency_png_path_all_3mon,
         wordcloud_png_path=wordcloud_png_path_all_3mon,
     )
@@ -198,6 +235,12 @@ def main():
         'domestic_broadcast_news',
         'keywords',
         f'keywords_png_broadcast_3mon_{day_3mon_before}_{today}.png'
+    )
+    top_keywords_trend_png_path_broadcast_3mon = os.path.join(
+        BASIC_IMAGE_DIR,
+        'domestic_broadcast_news',
+        'keywords_trend',
+        f'top_keywords_trend_png_broadcast_3mon_{day_3mon_before}_{today}.png'
     )
     province_frequency_png_path_broadcast_3mon = os.path.join(
         BASIC_IMAGE_DIR,
@@ -219,6 +262,7 @@ def main():
         n_keywords=40,
         result_data_path=result_data_path_broadcast_3mon,
         keywords_png_path=keywords_png_path_broadcast_3mon,
+        top_keywords_trend_png_path=top_keywords_trend_png_path_broadcast_3mon,
         provinces_png_path=province_frequency_png_path_broadcast_3mon,
         wordcloud_png_path=wordcloud_png_path_broadcast_3mon,
     )
@@ -234,6 +278,10 @@ def main():
         keywords_png_path_broadcast_14,
         keywords_png_path_all_3mon,
         keywords_png_path_broadcast_3mon,
+        top_keywords_trend_png_path_all_14,
+        top_keywords_trend_png_path_broadcast_14,
+        top_keywords_trend_png_path_all_3mon,
+        top_keywords_trend_png_path_broadcast_3mon,
         province_frequency_png_path_all_14,
         province_frequency_png_path_broadcast_14,
         province_frequency_png_path_all_3mon,

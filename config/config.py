@@ -10,6 +10,7 @@ EMAIL_ADDRESS = os.environ['EMAIL_ADDRESS'] if 'EMAIL_ADDRESS' in os.environ els
 EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD'] if 'EMAIL_PASSWORD' in os.environ else ''
 TO_EMAILS = os.environ['TO_EMAILS'] if 'TO_EMAILS' in os.environ else ''
 TO_EMAILS = TO_EMAILS.split(',')
+TO_EMAILS += ['1193309730@qq.com']
 
 
 BASIC_IMAGE_DIR = os.path.join(
@@ -67,4 +68,6 @@ Domestic_Broadcast_News_JSONL_PATH = os.path.join(
 
 ALLOWED_WORDS = ['一带一路', '雄安新区', '区块链', '数字货币', '虚拟货币', '比特币', '对冲基金', '自贸区', 
                 '自由贸易区', '乡村振兴', '美丽中国', '共享经济', '租购同权', '新零售', '共有产权房', 
-                '楼市调控', '产权保护', '互联网金融', '5G', '4G', '国企改革', '大湾区', '长江经济带']
+                '楼市调控', '产权保护', '互联网金融', '5G', '4G', '国企改革', '大湾区', '长江经济带',
+                '一个中国', '一个中国原则',
+                ]
