@@ -2,6 +2,9 @@ name: Daily News Collector
 
 # 定时任务: 每天晚上9点运行
 on:
+  push:
+    branches:
+      - main  # 当推送到 main 分支时触发工作流
   schedule:
       - cron: '0 */4 * * *'
 
