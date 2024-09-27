@@ -33,7 +33,7 @@ jobs:
       # 第四步：运行 Python 脚本并传递环境变量
       - name: Run Python Script
         env:
-          PROXIES: ${{ secrets.PROXY }}  # 引用 GitHub 密钥 PROXIES
+          PROXY: ${{ secrets.PROXY }}  # 引用 GitHub 密钥 PROXIES
           EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}  # 引用 GitHub 密钥 EMAIL_ADDRESS
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}  # 引用 GitHub 密钥 EMAIL_PASSWORD
           TO_EMAILS: ${{ secrets.TO_EMAILS }}  # 引用 GitHub 密钥 TO_EMAILS
