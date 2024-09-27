@@ -270,7 +270,7 @@ def main():
     
     
     # 发送电子邮件
-    email_sender = EmailSender(smtp_server='smtp.example.com', smtp_port=587,
+    email_sender = EmailSender(smtp_server='smtp.gmail.com', smtp_port=587,
                                 username=EMAIL_ADDRESS, password=EMAIL_PASSWORD)
     # 添加附件
     attachments = [

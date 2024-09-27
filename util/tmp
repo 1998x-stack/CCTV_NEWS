@@ -1,0 +1,47 @@
+import pandas as pd
+from tqdm import tqdm
+from datetime import datetime
+from typing import List, Dict
+
+# 假设 df 已经加载并且包含字段 'date', 'title', 'content'
+# 例如：df = pd.read_csv('data.csv')
+
+def extract_keywords_by_date(df: pd.DataFrame, n_keywords: int) -> pd.DataFrame:
+    """
+    提取关键词并根据日期调整分数.
+    
+    参数:
+        df (pd.DataFrame): 包含 'date', 'title', 'content' 的数据框.
+        n_keywords (int): 每个内容提取的关键词数量.
+        
+    返回:
+        pd.DataFrame: 包含 'date', 'keyword', 'score' 的结果数据框.
+    """
+    result_data: List[Dict] = []
+    
+    # 按日期分组并聚合标题和内容
+    grouped = df.groupby('date').agg({'title': 'first', 'content': ' '.join}).reset_index()
+    
+    # 获取当前日期
+    current_date = datetime.now()
+    
+    # 进行关键词提取
+    for idx, row in tqdm(grouped.iterrows(), total=len(grouped), desc="Extracting keywords"):
+        # 将标题和内容连接
+        txt = f"{row['title']}\n{row['content']}"
+        
+        # 提取关键词
+        keywords = analyzer.extract_keywords(txt, n_keywords=n_keywords)
+        
+        for keyword, score in keywords.items():
+            # 根据日期调整分数：越新，分数越高
+            age_days = (current_date - row['date']).days
+            adjusted_score = score * (1 / (age_days + 1))  # 越新分数越高
+            result_data.append({'date': row['date'], 'keyword': keyword, 'score': adjusted_score})
+
+    # 将结果数据转换为 DataFrame
+    return pd.DataFrame(result_data)
+
+# 调用函数并打印结果
+result_df = extract_keywords_by_date(df, n_keywords=10)
+print(result_df)

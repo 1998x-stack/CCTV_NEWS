@@ -186,18 +186,18 @@ def run_visualizations(
     Args:
         file_path: 输入数据的CSV文件路径
     """
-    if result_data_path is not None and \
-        keywords_png_path is not None and \
-            top_keywords_trend_png_path is not None and \
-                provinces_png_path is not None and \
-                    wordcloud_png_path is not None and \
-                        os.path.exists(result_data_path) and \
-                            os.path.exists(keywords_png_path) and \
-                                os.path.exists(top_keywords_trend_png_path) and \
-                                    os.path.exists(provinces_png_path) and \
-                                        os.path.exists(wordcloud_png_path):
-        logger.log_info(f"Visualizations already exist at {result_data_path}, {keywords_png_path}, {provinces_png_path}, {wordcloud_png_path}. Skipping.")
-        return pd.read_csv(result_data_path)
+    # if result_data_path is not None and \
+    #     keywords_png_path is not None and \
+    #         top_keywords_trend_png_path is not None and \
+    #             provinces_png_path is not None and \
+    #                 wordcloud_png_path is not None and \
+    #                     os.path.exists(result_data_path) and \
+    #                         os.path.exists(keywords_png_path) and \
+    #                             os.path.exists(top_keywords_trend_png_path) and \
+    #                                 os.path.exists(provinces_png_path) and \
+    #                                     os.path.exists(wordcloud_png_path):
+    #     logger.log_info(f"Visualizations already exist at {result_data_path}, {keywords_png_path}, {provinces_png_path}, {wordcloud_png_path}. Skipping.")
+    #     return pd.read_csv(result_data_path)
     
     # 初始化关键字分析器
     analyzer = KeywordExtractor(algorithm)
@@ -209,6 +209,7 @@ def run_visualizations(
     result_data = []
     for idx, row in tqdm(df.iterrows(), total=len(df), desc="Extracting keywords"):
         txt = '\n'.join(row[fields])
+        # TODO: groupby date and gather title and content
         keywords = analyzer.extract_keywords(txt, n_keywords=n_keywords)
         for keyword, score in keywords.items():
             # TODO: 日期越新，分数越高
