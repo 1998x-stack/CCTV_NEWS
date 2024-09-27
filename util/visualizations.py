@@ -99,7 +99,7 @@ def visualize_word_cloud(df: pd.DataFrame, png_path: str=None):
     plt.close()
     return png_path
 
-def visualize_keyword_trend(result_df: pd.DataFrame, top_n: int = 5, png_path: str = None) -> str:
+def visualize_keyword_trend(result_df: pd.DataFrame, top_n: int = 6, png_path: str = None) -> str:
     """可视化出现次数最多的前N个关键词的累积得分趋势。
     
     Args:
@@ -211,6 +211,7 @@ def run_visualizations(
         txt = '\n'.join(row[fields])
         keywords = analyzer.extract_keywords(txt, n_keywords=n_keywords)
         for keyword, score in keywords.items():
+            # TODO: 日期越新，分数越高
             result_data.append({'date': row['date'], 'keyword': keyword, 'score': score})
     
     logger.log_info(f"Keyword extraction completed.")

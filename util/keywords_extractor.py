@@ -9,7 +9,7 @@ from typing import List, Tuple
 
 warnings.filterwarnings("ignore")
 
-from config.config import BLACKWORDS_ZH_PATH, ALLOWED_WORDS
+from config.config import BLACKWORDS_ZH_PATH, ALLOWED_WORDS, DISALLOWED_WORDS
 
 class KeywordExtractor:
     """关键词抽取类，支持 TF-IDF、TextRank 和 YAKE 等算法。
@@ -64,9 +64,7 @@ class KeywordExtractor:
         Returns:
             str: 分词后的文本，以空格分隔。
         """
-        return ' '.join(jieba.cut(text))
-        # tokens = pseg.cut(text)
-        # return ' '.join([token for token, pos in tokens if pos.startswith('n')])
+        return ' '.join([word for word in jieba.cut(text) if word not in DISALLOWED_WORDS])
 
     def extract_keywords(self, text: str, n_keywords: int = 50) -> List[Tuple[str, float]]:
         """根据选择的算法提取关键词。
