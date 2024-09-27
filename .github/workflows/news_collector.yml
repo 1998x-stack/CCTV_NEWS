@@ -3,8 +3,9 @@ name: Daily News Collector
 # 定时任务: 每天晚上9点运行
 on:
   schedule:
-    - cron: '0 21 * * *'
+      - cron: '0 */4 * * *'
 
+# 工作流
 jobs:
   run-python-script:
     runs-on: ubuntu-latest
