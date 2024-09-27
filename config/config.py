@@ -11,11 +11,13 @@ EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD'] if 'EMAIL_PASSWORD' in os.environ 
 TO_EMAILS = os.environ['TO_EMAILS'] if 'TO_EMAILS' in os.environ else ''
 TO_EMAILS = TO_EMAILS.split(',')
 
+
 BASIC_IMAGE_DIR = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
     '..',
     'figures',
 )
+
 
 BASIC_DATA_DIR = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),

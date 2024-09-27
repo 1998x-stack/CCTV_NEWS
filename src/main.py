@@ -20,6 +20,62 @@ def main():
     markdown_content = MarkdownFormatter.format_news(collected_data)
     logger.log_info("Markdown content generated.")
     
+    ### make dirs
+    os.makedirs(
+        BASIC_IMAGE_DIR,
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'all',
+            'keywords'
+        ),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'all',
+            'province'
+        ),
+        exist_ok=True
+    )
+
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'all',
+            'wordCloud'
+        ),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'domestic_broadcast_news',
+            'keywords'
+        ),
+        exist_ok=True
+    )
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'domestic_broadcast_news',
+            'province'
+        ),
+        exist_ok=True
+    )
+
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'domestic_broadcast_news',
+            'wordCloud'
+        ),
+        exist_ok=True
+    )
+
     ### 14天前至今的数据可视化
     result_data_path_all_14 = os.path.join(
         BASIC_DATA_DIR,
