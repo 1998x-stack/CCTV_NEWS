@@ -10,15 +10,20 @@ from util.utils import get_last_jsonl_record_safe, append_to_jsonl, append_to_cs
 from config.config import DATA_CSV_PATH, DATA_JSONL_PATH, Domestic_Broadcast_News_CSV_PATH, Domestic_Broadcast_News_JSONL_PATH
 
 def modify_csv_and_jsonl(collected_data, csv_path, jsonl_path):
-    last_json = get_last_jsonl_record_safe(jsonl_path)
-    last_date = last_json.get('date') if last_json else None
-    if last_date:
-        if compare_dates(collected_data[0]['date'], last_date):
+    if len(collected_data) == 0:
+        return
+    try:
+        last_json = get_last_jsonl_record_safe(jsonl_path)
+        last_date = last_json.get('date') if last_json else None
+        if last_date:
+            if compare_dates(collected_data[0]['date'], last_date):
+                append_to_csv(collected_data, csv_path)
+                append_to_jsonl(collected_data, jsonl_path)
+        else:
             append_to_csv(collected_data, csv_path)
             append_to_jsonl(collected_data, jsonl_path)
-    else:
-        append_to_csv(collected_data, csv_path)
-        append_to_jsonl(collected_data, jsonl_path)
+    except:
+        logger.log_exception()
 
 def collect_news(day):
     try:
