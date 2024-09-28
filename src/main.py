@@ -307,6 +307,16 @@ def main():
         heatmap_html_path_broadcast_14,
         heatmap_html_path_all_3mon,
         heatmap_html_path_broadcast_3mon,
+        
+        heatmap_html_path_all_14.replace('province', 'city'),
+        heatmap_html_path_broadcast_14.replace('province', 'city'),
+        heatmap_html_path_all_3mon.replace('province', 'city'),
+        heatmap_html_path_broadcast_3mon.replace('province', 'city'),
+        
+        heatmap_html_path_all_14.replace('province', 'county'),
+        heatmap_html_path_broadcast_14.replace('province', 'county'),
+        heatmap_html_path_all_3mon.replace('province', 'county'),
+        heatmap_html_path_broadcast_3mon.replace('province', 'county'),
     ]
     
     attachments = [
