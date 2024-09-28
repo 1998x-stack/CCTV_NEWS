@@ -20,16 +20,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 第二步：设置 Python 缓存
-      - name: Cache Python packages
-        id: cache  # 添加一个 id，方便在后续步骤中引用
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip  # 缓存 pip 依赖的位置
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}  # 根据 requirements.txt 的哈希值来决定是否缓存
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       # 第三步：设置 Python 环境
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -38,7 +28,6 @@ jobs:
 
       # 第四步：如果没有缓存，安装依赖项
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'  # 这里引用的是上面设置的 id
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
