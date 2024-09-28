@@ -9,6 +9,7 @@ from src.news_collect_for_today import collect_news
 
 from util.log_utils import logger
 from util.email_sender import EmailSender
+from util.task_scheduler import TaskScheduler
 from util.markdown_formatter import MarkdownFormatter
 from util.visualizations import run_visualizations
 
@@ -320,4 +321,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    task_scheduler = TaskScheduler(interval_minutes=60*8)
+    task_scheduler.start_scheduler(main)
