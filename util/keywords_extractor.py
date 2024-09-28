@@ -90,8 +90,10 @@ class KeywordExtractor:
         for word, score in keywords:
             if word in self.stopwords:
                 keywords.remove((word, score))
-        keywords = {word.replace(' ', ''): score for word, score in keywords if word.replace(' ', '') not in self.stopwords}
-        return self.filter_keywords(keywords)
+        keywords = {word.replace(' ', ''): score for word, score in keywords}
+        keywords = self.filter_keywords(keywords)
+        keywords = {word: score for word, score in keywords.items() if word not in self.stopwords}
+        return keywords
 
     @staticmethod
     def filter_keywords(keywords):

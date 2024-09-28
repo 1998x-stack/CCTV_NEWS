@@ -3,7 +3,7 @@ import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
 import pandas as pd
-import json
+import json, cpca
 import os
 from typing import List, Union, Tuple
 from filelock import FileLock
@@ -214,3 +214,44 @@ def determine_format(date):
     elif isinstance(date, pd.Timestamp):
         return ''
     return '%Y%m%d'
+    
+def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> dict:
+    """
+    使用cpca提取省、市、县区信息，并统计出现次数。
+    Args:
+        data: 包含文本内容的数据框。
+        fields: 要提取的文本字段列表。
+    Returns:
+        包含省、市、县区统计结果的字典。
+    """
+    texts = data[fields].apply(lambda x: '\n'.join(x), axis=1)
+    location_data = cpca.transform(texts.tolist())
+
+    # 统计省份数量
+    province_counts = location_data['省'].value_counts().reset_index()
+    province_counts.columns = ['Province', 'Count']
+    province_counts.sort_values(by='Count', ascending=False, inplace=True)
+    province_counts.reset_index(drop=True, inplace=True)
+    # select top 40
+    province_counts = province_counts.head(40)
+
+    # 统计城市数量
+    city_counts = location_data['市'].value_counts().reset_index()
+    city_counts.columns = ['City', 'Count']
+    city_counts.sort_values(by='Count', ascending=False, inplace=True)
+    city_counts.reset_index(drop=True, inplace=True)
+    city_counts = city_counts.head(40)
+
+    # 统计县区数量
+    county_counts = location_data['区'].value_counts().reset_index()
+    county_counts.columns = ['County', 'Count']
+    county_counts = county_counts[county_counts['County'] != '郊区']
+    county_counts.sort_values(by='Count', ascending=False, inplace=True)
+    county_counts.reset_index(drop=True, inplace=True)
+    county_counts = county_counts.head(40)
+
+    return {
+        'province': province_counts,
+        'city': city_counts,
+        'county': county_counts
+    }

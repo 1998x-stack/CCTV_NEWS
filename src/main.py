@@ -45,7 +45,7 @@ def main():
         os.path.join(
             BASIC_IMAGE_DIR,
             'all',
-            'province'
+            'location'
         ),
         exist_ok=True
     )
@@ -78,7 +78,7 @@ def main():
         os.path.join(
             BASIC_IMAGE_DIR,
             'domestic_broadcast_news',
-            'province'
+            'location'
         ),
         exist_ok=True
     )
@@ -113,7 +113,7 @@ def main():
     province_frequency_png_path_all_14 = os.path.join(
         BASIC_IMAGE_DIR,
         'all',
-        'province',
+        'location',
         f'province_frequency_png_all_14_{day_14_before}_{today}.png'
     )
     wordcloud_png_path_all_14 = os.path.join(
@@ -157,7 +157,7 @@ def main():
     province_frequency_png_path_broadcast_14 = os.path.join(
         BASIC_IMAGE_DIR,
         'domestic_broadcast_news',
-        'province',
+        'location',
         f'province_frequency_png_broadcast_14_{day_14_before}_{today}.png'
     )
     wordcloud_png_path_broadcast_14 = os.path.join(
@@ -201,7 +201,7 @@ def main():
     province_frequency_png_path_all_3mon = os.path.join(
         BASIC_IMAGE_DIR,
         'all',
-        'province',
+        'location',
         f'province_frequency_png_all_3mon_{day_3mon_before}_{today}.png'
     )
     wordcloud_png_path_all_3mon = os.path.join(
@@ -245,7 +245,7 @@ def main():
     province_frequency_png_path_broadcast_3mon = os.path.join(
         BASIC_IMAGE_DIR,
         'domestic_broadcast_news',
-        'province',
+        'location',
         f'province_frequency_png_broadcast_3mon_{day_3mon_before}_{today}.png'
     )
     wordcloud_png_path_broadcast_3mon = os.path.join(
@@ -278,18 +278,36 @@ def main():
         keywords_png_path_broadcast_14,
         keywords_png_path_all_3mon,
         keywords_png_path_broadcast_3mon,
-        top_keywords_trend_png_path_all_14,
-        top_keywords_trend_png_path_broadcast_14,
-        top_keywords_trend_png_path_all_3mon,
-        top_keywords_trend_png_path_broadcast_3mon,
-        province_frequency_png_path_all_14,
-        province_frequency_png_path_broadcast_14,
-        province_frequency_png_path_all_3mon,
-        province_frequency_png_path_broadcast_3mon,
+        
+        
         wordcloud_png_path_all_14,
         wordcloud_png_path_broadcast_14,
         wordcloud_png_path_all_3mon,
         wordcloud_png_path_broadcast_3mon,
+        
+        
+        top_keywords_trend_png_path_all_14,
+        top_keywords_trend_png_path_broadcast_14,
+        top_keywords_trend_png_path_all_3mon,
+        top_keywords_trend_png_path_broadcast_3mon,
+        
+        
+        province_frequency_png_path_all_14,
+        province_frequency_png_path_broadcast_14,
+        province_frequency_png_path_all_3mon,
+        province_frequency_png_path_broadcast_3mon,
+        
+        
+        province_frequency_png_path_all_14.replace('province', 'city'),
+        province_frequency_png_path_broadcast_14.replace('province', 'city'),
+        province_frequency_png_path_all_3mon.replace('province', 'city'),
+        province_frequency_png_path_broadcast_3mon.replace('province', 'city'),
+        
+        
+        province_frequency_png_path_all_14.replace('province', 'county'),
+        province_frequency_png_path_broadcast_14.replace('province', 'county'),
+        province_frequency_png_path_all_3mon.replace('province', 'county'),
+        province_frequency_png_path_broadcast_3mon.replace('province', 'county'),
     ]
     
     email_sender.send_email(

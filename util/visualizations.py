@@ -1,10 +1,10 @@
 import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
-import cpca
 import warnings
 import pandas as pd
 from tqdm import tqdm
+from datetime import datetime
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from matplotlib import font_manager
@@ -12,27 +12,13 @@ from matplotlib import font_manager
 from config.config import FONT_PATH, DATA_CSV_PATH
 
 from util.log_utils import logger
-from util.utils import load_data
 from util.keywords_extractor import KeywordExtractor
+from util.utils import load_data, extract_location_counts
 
 warnings.filterwarnings("ignore")
 
 font_manager.fontManager.addfont(FONT_PATH)
 plt.rcParams['font.family'] = 'SimHei'
-
-def extract_provinces(data: pd.DataFrame, fields = ['title', 'content']) -> pd.DataFrame:
-    """ 使用cpca提取省份信息
-    Args:
-        data: 包含文本内容的数据框
-    Returns:
-        包含省份统计结果的数据框
-    """
-    texts = data[fields].apply(lambda x:'\n'.join(x), axis=1)
-    provinces = cpca.transform(texts.tolist())
-    # provinces = cpca.transform(data['content'].tolist())
-    province_counts = provinces['省'].value_counts().reset_index()
-    province_counts.columns = ['Province', 'Count']
-    return province_counts
 
 
 def visualize_keywords(df: pd.DataFrame, png_path: str=None):
@@ -45,33 +31,28 @@ def visualize_keywords(df: pd.DataFrame, png_path: str=None):
         '..',
         'figures/keywords_bar_chart.png'
     ) if png_path is None else png_path
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(15, 10))
     top_keywords = df.groupby('keyword')['score'].sum().nlargest(40).reset_index()
     plt.barh(top_keywords['keyword'], top_keywords['score'], color='skyblue')
-    plt.title('Top 40 Keywords')
-    plt.xlabel('Frequency')
-    plt.ylabel('Keywords')
+    plt.title('新闻联播核心词')
+    plt.xlabel('分数')
+    plt.ylabel('关键词')
     plt.tight_layout()
     plt.savefig(png_path)
     plt.close()
     return png_path
 
-
-def visualize_provinces(pro_data: pd.DataFrame, png_path: str=None):
-    """ 可视化省份频率
-    Args:
-        pro_data: 包含省份和频率的数据框
-    """
+def visualize_locations(pro_data: pd.DataFrame, kind='province', png_path: str=None):
     png_path = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
         '..',
-        'figures/province_bar_chart.png'
+        f'figures/{kind}_bar_chart.png'
     ) if png_path is None else png_path
     plt.figure(figsize=(12, 6))
-    plt.barh(pro_data['Province'], pro_data['Count'], color='lightgreen')
-    plt.title('Province Frequency')
-    plt.xlabel('Frequency')
-    plt.ylabel('Province')
+    plt.barh(pro_data[kind.capitalize()], pro_data['Count'], color='lightgreen')
+    plt.title(f'{kind} 提及频次')
+    plt.xlabel('提及频次')
+    plt.ylabel(kind.capitalize())
     plt.tight_layout()
     plt.savefig(png_path)
     plt.close()
@@ -203,20 +184,24 @@ def run_visualizations(
     analyzer = KeywordExtractor(algorithm)
     logger.log_info(f"Keyword extractor initialized; Using {algorithm} algorithm.")
     df = load_data(file_path, date_range)
+    # 按日期分组并聚合标题和内容
+    grouped = df.groupby('date').agg({'title': '\n'.join, 'content': '\n'.join}).reset_index()
     logger.log_info(f"Data loaded from {file_path} between {date_range}")
     
     # 进行关键词分析
     result_data = []
-    for idx, row in tqdm(df.iterrows(), total=len(df), desc="Extracting keywords"):
-        txt = '\n'.join(row[fields])
-        # TODO: groupby date and gather title and content
+    # 获取当前日期
+    current_date = datetime.now()
+    for idx, row in tqdm(grouped.iterrows(), total=len(grouped), desc="Extracting keywords"):
+        txt = f'\n'.join(row[fields])
         keywords = analyzer.extract_keywords(txt, n_keywords=n_keywords)
         for keyword, score in keywords.items():
-            # TODO: 日期越新，分数越高
-            result_data.append({'date': row['date'], 'keyword': keyword, 'score': score})
+            # 根据日期调整分数：越新，分数越高
+            age_days = (current_date - row['date']).days / 7
+            adjusted_score = score * (1 / (age_days + 1))  # 越新分数越高
+            result_data.append({'date': row['date'], 'keyword': keyword, 'score': adjusted_score})
     
     logger.log_info(f"Keyword extraction completed.")
-    
     result_df = pd.DataFrame(result_data)
     # 关键词可视化
     keywords_png_path = visualize_keywords(result_df, keywords_png_path)
@@ -224,9 +209,18 @@ def run_visualizations(
     top_keywords_trend_png_path = visualize_keyword_trend(result_df=result_df, top_n=6, png_path=top_keywords_trend_png_path)
     logger.log_info(f"Top keywords trend visualization saved to {top_keywords_trend_png_path}")
     # 省份信息提取与可视化
-    province_data = extract_provinces(df, fields=fields)
-    provinces_png_path = visualize_provinces(province_data, provinces_png_path)
+    location_data = extract_location_counts(df, fields=fields)
+    province_data = location_data['province']
+    city_data = location_data['city']
+    county_data = location_data['county']
+    city_png_path = provinces_png_path.replace('province', 'city') if provinces_png_path else None
+    county_png_path = provinces_png_path.replace('province', 'county') if provinces_png_path else None
+    provinces_png_path = visualize_locations(province_data, kind='province', png_path=provinces_png_path)
     logger.log_info(f"Province visualization saved to {provinces_png_path}")
+    city_png_path = visualize_locations(city_data, kind='city', png_path=city_png_path)
+    logger.log_info(f"City visualization saved to {city_png_path}")
+    county_png_path = visualize_locations(county_data, kind='county', png_path=county_png_path)
+    logger.log_info(f"County visualization saved to {county_png_path}")
     # 词云可视化
     wordcloud_png_path = visualize_word_cloud(result_df, wordcloud_png_path)
     logger.log_info(f"Word cloud visualization saved to {wordcloud_png_path}")
