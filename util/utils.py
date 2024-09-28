@@ -236,7 +236,7 @@ def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> 
     # 统计城市数量
     city_counts = location_data['市'].value_counts().reset_index()
     city_counts.columns = ['City', 'Count']
-    city_counts = city_counts[county_counts['City'] != '市辖区']
+    city_counts = city_counts[city_counts['City'] != '市辖区']
     city_counts.sort_values(by='Count', ascending=False, inplace=True)
     city_counts.reset_index(drop=True, inplace=True)
 
