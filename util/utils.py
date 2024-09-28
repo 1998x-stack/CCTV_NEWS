@@ -225,6 +225,8 @@ def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> 
         包含省、市、县区统计结果的字典。
     """
     texts = data[fields].apply(lambda x: '\n'.join(x), axis=1)
+    text_list = texts.tolist()
+    text_list = [text.replace('合作', '') for text in text_list]
     location_data = cpca.transform(texts.tolist())
 
     # 统计省份数量
