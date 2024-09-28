@@ -5,8 +5,10 @@ on:
   push:
     branches:
       - main  # 当推送到 main 分支时触发工作流
-  # schedule:
-  #     - cron: '0 */8 * * *'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * *'   # 每天 UTC 时间 1:00 触发工作流，等同于北京时间早上 9:00
+    - cron: '40 11 * * *'  # 每天 UTC 时间 11:40 触发工作流，等同于北京时间晚上 7:40
 
 # 工作流
 jobs:

@@ -14,17 +14,27 @@ class MarkdownFormatter:
         """将新闻列表格式化为 Markdown 字符串。"""
         # 标题和日期部分
         markdown_lines = [
-            f"# 新闻联播\n",
-            f"> 发布日期：{datetime.now().strftime('%Y-%m-%d')}\n",
+            "# 新闻联播 📰\n",  # 增加表情符号
+            f"> 发布日期：{datetime.now().strftime('%Y-%m-%d')} 📅\n",
             "---\n"
         ]
         for news in news_list:
-            title = news.get('title', '')
+            title = news.get('title', '无标题')  # 提供默认标题
             url = news.get('link', '')  # 确保使用正确的键
-            content = news.get('content', '')  # 加载内容
-            markdown_lines.append(f"### [{title}]({url})\n  {content}")
-            markdown_lines.append("---\n")  # 分隔线
+            content = news.get('content', '无内容')  # 加载内容，默认值为空内容
             
+            # 使用 Markdown 链接格式，增强可读性
+            markdown_lines.append(f"### [{title}]({url})\n")
+            
+            # 处理内容中的换行符，每段添加引用符号
+            paragraphs = content.split('\n')
+            for paragraph in paragraphs:
+                if paragraph.strip():  # 跳过空行
+                    markdown_lines.append(f"> {paragraph.strip()}\n")
+            
+            markdown_lines.append("\n---\n")  # 使用分隔线来划分新闻条目
+        
+        # 合并所有行
         text = '\n'.join(markdown_lines)
         return markdown.markdown(text)
     

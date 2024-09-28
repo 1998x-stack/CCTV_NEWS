@@ -1,6 +1,8 @@
 import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
+TARGET_TIME = '19:35'
+
 PROXIES = {
     'https' : f"http://{os.environ['PROXY']}",
     'http' : f"http://{os.environ['PROXY']}",

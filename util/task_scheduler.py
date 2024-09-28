@@ -94,16 +94,15 @@ class TimezoneAwareScheduler:
             now = datetime.now(self.timezone)
             logger.log_info(f"任务开始执行，当前时间为 {now.strftime('%Y-%m-%d %H:%M:%S')} ({self.timezone.zone})")
             task_function()
+            logger.log_info(f"任务执行完成，当前时间为 {now.strftime('%Y-%m-%d %H:%M:%S')} ({self.timezone.zone})")
 
         # 每天在指定时区和时间执行任务
         schedule.every().day.at(self.target_time).do(job_wrapper)
-        
         logger.log_info(f"任务调度器已启动，每天 {self.target_time} ({self.timezone.zone}) 执行一次任务。")
-        
         try:
             while True:
                 schedule.run_pending()  # 检查待执行的任务
-                time.sleep(1)  # 睡眠以降低 CPU 负载
+                time.sleep(5)  # 睡眠以降低 CPU 负载
         except KeyboardInterrupt:
             logger.log_info("任务调度器已手动终止。")
         except Exception as error:

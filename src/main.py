@@ -3,7 +3,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
 from datetime import datetime, timedelta
 
-from config.config import EMAIL_ADDRESS, EMAIL_PASSWORD, TO_EMAILS, DATA_CSV_PATH, Domestic_Broadcast_News_CSV_PATH, BASIC_DATA_DIR, BASIC_IMAGE_DIR
+from config.config import EMAIL_ADDRESS, EMAIL_PASSWORD, TO_EMAILS, DATA_CSV_PATH, Domestic_Broadcast_News_CSV_PATH, BASIC_DATA_DIR, BASIC_IMAGE_DIR, TARGET_TIME
 from src.news_collect_for_today import collect_news
 
 
@@ -321,5 +321,6 @@ def main():
 
 
 if __name__ == "__main__":
-    task_scheduler = TimezoneAwareScheduler(target_time='13:52')
-    task_scheduler.start_scheduler(main)
+    main()
+    # task_scheduler = TimezoneAwareScheduler(target_time=TARGET_TIME)
+    # task_scheduler.start_scheduler(main)
