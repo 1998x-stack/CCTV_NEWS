@@ -1,7 +1,7 @@
 import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from config.config import PROXIES
 from util.log_utils import logger
@@ -26,7 +26,11 @@ def collect_news(day):
         collected_data = video_data_collector.collect_all_data()
         if not collected_data:
             logger.log_info(f"No data collected for {day}.")
-            return []
+            day_before = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            video_data_collector = VideoDataCollector(start_date=day_before, end_date=day_before, proxies=PROXIES)
+            collected_data = video_data_collector.collect_all_data()
+            logger.log_info(f"Now data collected for {day_before}.")
+            return collected_data
         logger.log_info(f"Collected data for {day}: {collected_data}")
         collected_domestic_broadcast_news = [data for data in collected_data if data['title'] == '国内联播快讯']
         modify_csv_and_jsonl(collected_data, DATA_CSV_PATH, DATA_JSONL_PATH)

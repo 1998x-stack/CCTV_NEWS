@@ -52,7 +52,7 @@ class EmailSender:
         message['Subject'] = subject
 
         # 添加邮件正文
-        message.attach(MIMEText(body, 'plain', 'utf-8'))
+        message.attach(MIMEText(body, 'html'))
 
         if attachments:
             for filepath in attachments:
