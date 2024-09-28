@@ -232,23 +232,22 @@ def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> 
     province_counts.columns = ['Province', 'Count']
     province_counts.sort_values(by='Count', ascending=False, inplace=True)
     province_counts.reset_index(drop=True, inplace=True)
-    # select top 40
-    province_counts = province_counts.head(40)
 
     # 统计城市数量
     city_counts = location_data['市'].value_counts().reset_index()
     city_counts.columns = ['City', 'Count']
+    city_counts = city_counts[county_counts['City'] != '市辖区']
     city_counts.sort_values(by='Count', ascending=False, inplace=True)
     city_counts.reset_index(drop=True, inplace=True)
-    city_counts = city_counts.head(40)
 
     # 统计县区数量
     county_counts = location_data['区'].value_counts().reset_index()
     county_counts.columns = ['County', 'Count']
     county_counts = county_counts[county_counts['County'] != '郊区']
+    county_counts = county_counts[county_counts['County'] != '市辖区']
+    county_counts = county_counts[county_counts['County'] != '合作市']
     county_counts.sort_values(by='Count', ascending=False, inplace=True)
     county_counts.reset_index(drop=True, inplace=True)
-    county_counts = county_counts.head(40)
 
     return {
         'province': province_counts,

@@ -5,6 +5,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List, Optional
+from email.mime.application import MIMEApplication
 
 from util.log_utils import logger
 
@@ -33,7 +34,7 @@ class EmailSender:
         self.password = password
         logger.log_info("EmailSender 实例已创建。")
 
-    def send_email(self, subject: str, body: str, to_emails: List[str], attachments: Optional[List[str]] = None) -> None:
+    def send_email(self, subject: str, body: str, to_emails: List[str], html_attachments: Optional[List[str]] = None, attachments: Optional[List[str]] = None) -> None:
         """发送电子邮件。
 
         Args:
@@ -54,6 +55,14 @@ class EmailSender:
         # 添加邮件正文
         message.attach(MIMEText(body, 'html'))
 
+        if html_attachments:
+            for html_file in html_attachments:
+                # Attach the HTML file
+                with open(html_file, 'rb') as file:
+                    attachment = MIMEApplication(file.read(), _subtype='html')
+                    attachment.add_header('Content-Disposition', 'attachment', filename=html_file)
+                    message.attach(attachment)
+                    
         if attachments:
             for filepath in attachments:
                 try:

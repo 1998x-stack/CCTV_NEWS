@@ -123,6 +123,12 @@ def main():
         'wordCloud',
         f'wordcloud_png_all_14_{day_14_before}_{today}.png'
     )
+    heatmap_html_path_all_14 = os.path.join(
+        BASIC_IMAGE_DIR,
+        'all',
+        'heatmap',
+        f'province_heatmap_html_all_14_{day_14_before}_{today}.html'
+    )
     run_visualizations(
         file_path=DATA_CSV_PATH,
         date_range=(day_14_before, today),
@@ -134,6 +140,7 @@ def main():
         top_keywords_trend_png_path=top_keywords_trend_png_path_all_14,
         provinces_png_path=province_frequency_png_path_all_14,
         wordcloud_png_path=wordcloud_png_path_all_14,
+        heatmap_html_path=heatmap_html_path_all_14,
     )
     logger.log_info("Visualizations for 14 days before today completed.")
     
@@ -167,6 +174,12 @@ def main():
         'wordCloud',
         f'wordcloud_png_broadcast_14_{day_14_before}_{today}.png'
     )
+    heatmap_html_path_broadcast_14 = os.path.join(
+        BASIC_IMAGE_DIR,
+        'domestic_broadcast_news',
+        'heatmap',
+        f'province_heatmap_html_broadcast_14_{day_14_before}_{today}.html'
+    )
     run_visualizations(
         file_path=Domestic_Broadcast_News_CSV_PATH,
         date_range=(day_14_before, today),
@@ -178,6 +191,7 @@ def main():
         top_keywords_trend_png_path=top_keywords_trend_png_path_broadcast_14,
         provinces_png_path=province_frequency_png_path_broadcast_14,
         wordcloud_png_path=wordcloud_png_path_broadcast_14,
+        heatmap_html_path=heatmap_html_path_broadcast_14,
     )
     logger.log_info("Visualizations for 14 days before today's domestic broadcast news completed.")
     
@@ -211,6 +225,12 @@ def main():
         'wordCloud',
         f'wordcloud_png_all_3mon_{day_3mon_before}_{today}.png'
     )
+    heatmap_html_path_all_3mon = os.path.join(
+        BASIC_IMAGE_DIR,
+        'all',
+        'heatmap',
+        f'province_heatmap_html_all_3mon_{day_3mon_before}_{today}.html'
+    )
     run_visualizations(
         file_path=DATA_CSV_PATH,
         date_range=(day_3mon_before, today),
@@ -222,6 +242,7 @@ def main():
         top_keywords_trend_png_path=top_keywords_trend_png_path_all_3mon,
         provinces_png_path=province_frequency_png_path_all_3mon,
         wordcloud_png_path=wordcloud_png_path_all_3mon,
+        heatmap_html_path=heatmap_html_path_all_3mon,
     )
     logger.log_info("Visualizations for 90 days before today completed.")
     
@@ -255,6 +276,12 @@ def main():
         'wordCloud',
         f'wordcloud_png_broadcast_3mon_{day_3mon_before}_{today}.png'
     )
+    heatmap_html_path_broadcast_3mon = os.path.join(
+        BASIC_IMAGE_DIR,
+        'domestic_broadcast_news',
+        'heatmap',
+        f'province_heatmap_html_broadcast_3mon_{day_3mon_before}_{today}.html'
+    )
     run_visualizations(
         file_path=Domestic_Broadcast_News_CSV_PATH,
         date_range=(day_3mon_before, today),
@@ -266,6 +293,7 @@ def main():
         top_keywords_trend_png_path=top_keywords_trend_png_path_broadcast_3mon,
         provinces_png_path=province_frequency_png_path_broadcast_3mon,
         wordcloud_png_path=wordcloud_png_path_broadcast_3mon,
+        heatmap_html_path=heatmap_html_path_broadcast_3mon,
     )
     logger.log_info("Visualizations for 90 days before today's domestic broadcast news completed.")
     
@@ -274,6 +302,13 @@ def main():
     email_sender = EmailSender(smtp_server='smtp.gmail.com', smtp_port=587,
                                 username=EMAIL_ADDRESS, password=EMAIL_PASSWORD)
     # 添加附件
+    html_attachments = [
+        heatmap_html_path_all_14,
+        heatmap_html_path_broadcast_14,
+        heatmap_html_path_all_3mon,
+        heatmap_html_path_broadcast_3mon,
+    ]
+    
     attachments = [
         keywords_png_path_all_14,
         keywords_png_path_broadcast_14,
@@ -315,6 +350,7 @@ def main():
             subject=f"新闻联播 ({today})", 
             body=markdown_content, 
             to_emails=TO_EMAILS, 
+            html_attachments=html_attachments,
             attachments=attachments
         )
     logger.log_info("Email sent successfully.")

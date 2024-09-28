@@ -12,6 +12,7 @@ from matplotlib import font_manager
 from config.config import FONT_PATH, DATA_CSV_PATH
 
 from util.log_utils import logger
+from util.news_heatmap import create_heatmap
 from util.keywords_extractor import KeywordExtractor
 from util.utils import load_data, extract_location_counts
 
@@ -43,6 +44,7 @@ def visualize_keywords(df: pd.DataFrame, png_path: str=None):
     return png_path
 
 def visualize_locations(pro_data: pd.DataFrame, kind='province', png_path: str=None):
+    pro_data = pro_data.head(30)
     png_path = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
         '..',
@@ -162,6 +164,7 @@ def run_visualizations(
         top_keywords_trend_png_path: str=None,
         provinces_png_path: str=None,
         wordcloud_png_path: str=None,
+        heatmap_html_path: str=None,
     ):
     """ 主程序，负责运行整个数据处理流程
     Args:
@@ -208,11 +211,15 @@ def run_visualizations(
     logger.log_info(f"Keyword visualization saved to {keywords_png_path}")
     top_keywords_trend_png_path = visualize_keyword_trend(result_df=result_df, top_n=6, png_path=top_keywords_trend_png_path)
     logger.log_info(f"Top keywords trend visualization saved to {top_keywords_trend_png_path}")
+    
+    
     # 省份信息提取与可视化
     location_data = extract_location_counts(df, fields=fields)
     province_data = location_data['province']
     city_data = location_data['city']
     county_data = location_data['county']
+    
+    
     city_png_path = provinces_png_path.replace('province', 'city') if provinces_png_path else None
     county_png_path = provinces_png_path.replace('province', 'county') if provinces_png_path else None
     provinces_png_path = visualize_locations(province_data, kind='province', png_path=provinces_png_path)
@@ -221,6 +228,18 @@ def run_visualizations(
     logger.log_info(f"City visualization saved to {city_png_path}")
     county_png_path = visualize_locations(county_data, kind='county', png_path=county_png_path)
     logger.log_info(f"County visualization saved to {county_png_path}")
+    
+    
+    province_heatmap_html_path = heatmap_html_path.replace('province', 'province') if heatmap_html_path else None
+    city_heatmap_html_path = heatmap_html_path.replace('province', 'city') if heatmap_html_path else None
+    county_heatmap_html_path = heatmap_html_path.replace('province', 'county') if heatmap_html_path else None
+    create_heatmap(province_data, 'province', province_heatmap_html_path)
+    logger.log_info(f"Province heatmap saved to {province_heatmap_html_path}")
+    create_heatmap(city_data, 'city', city_heatmap_html_path)
+    logger.log_info(f"City heatmap saved to {city_heatmap_html_path}")
+    create_heatmap(county_data, 'county', county_heatmap_html_path)
+    logger.log_info(f"County heatmap saved to {county_heatmap_html_path}")
+    
     # 词云可视化
     wordcloud_png_path = visualize_word_cloud(result_df, wordcloud_png_path)
     logger.log_info(f"Word cloud visualization saved to {wordcloud_png_path}")
