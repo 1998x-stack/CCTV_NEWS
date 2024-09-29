@@ -26,6 +26,15 @@ def main():
         BASIC_IMAGE_DIR,
         exist_ok=True
     )
+    ### 所有数据可视化
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'all',
+            'heatmap'
+        ),
+        exist_ok=True
+    )
     os.makedirs(
         os.path.join(
             BASIC_IMAGE_DIR,
@@ -50,7 +59,6 @@ def main():
         ),
         exist_ok=True
     )
-
     os.makedirs(
         os.path.join(
             BASIC_IMAGE_DIR,
@@ -59,6 +67,16 @@ def main():
         ),
         exist_ok=True
     )
+    
+    ### 国内广播新闻可视化
+    os.makedirs(
+        os.path.join(
+            BASIC_IMAGE_DIR,
+            'domestic_broadcast_news',
+            'heatmap'
+        ),
+        exist_ok=True
+    )
     os.makedirs(
         os.path.join(
             BASIC_IMAGE_DIR,
@@ -83,7 +101,6 @@ def main():
         ),
         exist_ok=True
     )
-
     os.makedirs(
         os.path.join(
             BASIC_IMAGE_DIR,
@@ -357,7 +374,7 @@ def main():
     ]
     
     email_sender.send_email(
-            subject=f"新闻联播 ({today})", 
+            subject=f"《新闻联播》 ({today})", 
             body=markdown_content, 
             to_emails=TO_EMAILS, 
             html_attachments=html_attachments,

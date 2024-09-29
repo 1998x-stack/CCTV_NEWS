@@ -2,16 +2,15 @@
 import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
+import pandas as pd
 import folium
 from folium.plugins import HeatMap
+
 import cpca
-import pandas as pd
-
-from util.log_utils import logger
-
-# 从 cpca 代码中导入 ad_2_addr_dict
 from cpca import _init_data
 ad_2_addr_dict, matcher = _init_data()  # 初始化 adcode 数据和 matcher
+
+from util.log_utils import logger
 
 def get_lat_lon(city: str) -> tuple:
     """
@@ -66,21 +65,5 @@ def create_heatmap(city_count: pd.DataFrame, kind = 'province', heatmap_html_pat
     HeatMap(data).add_to(m)
     # 保存生成的地图为 HTML 文件
     m.save(heatmap_html_path)
+    
     return heatmap_html_path
-
-if __name__ == "__main__":
-    # Corrected example data
-    city_count_example = pd.DataFrame(
-        [
-            ["北京市", 1200],
-            ["上海市", 800],
-            ["广州市", 400],
-            ["杭州市", 250],
-            ["成都市", 150]
-        ],
-        columns=["城市", "计数"]
-    )
-
-    # 生成热力图
-    html_path = create_heatmap(city_count_example)
-    logger.log_info(f"热力图已生成，文件路径为: {html_path}")

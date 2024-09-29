@@ -34,9 +34,6 @@ def collect_news(day):
             day_before = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
             video_data_collector = VideoDataCollector(start_date=day_before, end_date=day_before, proxies=PROXIES)
             collected_data = video_data_collector.collect_all_data()
-            logger.log_info(f"Now data collected for {day_before}.")
-            return collected_data
-        logger.log_info(f"Collected data for {day}: {collected_data}")
         collected_domestic_broadcast_news = [data for data in collected_data if data['title'] == '国内联播快讯']
         modify_csv_and_jsonl(collected_data, DATA_CSV_PATH, DATA_JSONL_PATH)
         modify_csv_and_jsonl(collected_domestic_broadcast_news, Domestic_Broadcast_News_CSV_PATH, Domestic_Broadcast_News_JSONL_PATH)

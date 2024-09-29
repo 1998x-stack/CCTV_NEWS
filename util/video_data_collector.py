@@ -2,15 +2,13 @@
 import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
-import requests
+import pandas as pd
+import requests, json, time
+from tqdm import tqdm  # 导入tqdm库
 from bs4 import BeautifulSoup
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
-import json
-import pandas as pd
-import time
-from tqdm import tqdm  # 导入tqdm库
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from util.log_utils import logger
 from util.utils import determine_format
@@ -19,8 +17,8 @@ class VideoDataCollector:
     def __init__(self, start_date: str, end_date: str, proxies: Dict[str, str]):
         """
         初始化视频数据收集器
-        :param start_date: 开始日期，格式为 "YYYYMMDD"
-        :param end_date: 结束日期，格式为 "YYYYMMDD"
+        :param start_date: 开始日期，格式为 "YYYYMMDD" 等
+        :param end_date: 结束日期，格式为 "YYYYMMDD" 等
         :param proxies: 代理设置字典
         """
         start_date_format = determine_format(start_date)
@@ -46,16 +44,14 @@ class VideoDataCollector:
                 for li in soup.select('li'):
                     video_info = {}
                     anchor = li.find('a', href=True)
-
                     # 确保存在链接和标题
                     if anchor and 'title' in anchor.attrs:
+                        video_info['date'] = date
                         video_info['link'] = anchor['href']
                         video_info['title'] = anchor['title']
-                        video_info['date'] = date  # 添加日期键
                     else:
                         logger.log_info(f"No valid link or title found for date {date}. Skipping entry.")
                         continue  # 如果没有链接或标题，跳过这个条目
-
                     duration_span = li.find('span')
                     video_info['duration'] = duration_span.text if duration_span else "未知时长"  # 处理时长缺失的情况
                     video_info['content'] = self.get_video_content(video_info['link'])
@@ -82,15 +78,7 @@ class VideoDataCollector:
         except Exception as e:
             logger.log_exception()
             return "内容未找到"
-
-    def date_range(self) -> List[str]:
-        """
-        生成日期范围内的所有日期
-        :return: 日期列表，格式为 "YYYYMMDD"
-        """
-        delta = self.end_date - self.start_date
-        return [(self.start_date + timedelta(days=i)).strftime("%Y%m%d") for i in range(delta.days + 1)]
-
+        
     def collect_all_data(self) -> List[Dict[str, Any]]:
         """
         收集指定日期范围内的所有视频数据
@@ -112,6 +100,7 @@ class VideoDataCollector:
                         logger.log_info(f"Failed: No data found for {date}")
                 except Exception as e:
                     logger.log_exception()
+                    
         return self.clean_collected_data(all_data)
 
     def clean_collected_data(self, collected_data):
@@ -127,6 +116,14 @@ class VideoDataCollector:
             if '内容未找到' not in data['content']
         ]
         return collected_data
+
+    def date_range(self) -> List[str]:
+        """
+        生成日期范围内的所有日期
+        :return: 日期列表，格式为 "YYYYMMDD"
+        """
+        delta = self.end_date - self.start_date
+        return [(self.start_date + timedelta(days=i)).strftime("%Y%m%d") for i in range(delta.days + 1)]
     
     def convert_date(self, date) -> str:
         date_str = str(date)

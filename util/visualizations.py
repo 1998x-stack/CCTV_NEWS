@@ -6,6 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from wordcloud import WordCloud
 from matplotlib import font_manager
 
@@ -17,7 +18,6 @@ from util.keywords_extractor import KeywordExtractor
 from util.utils import load_data, extract_location_counts
 
 warnings.filterwarnings("ignore")
-
 font_manager.fontManager.addfont(FONT_PATH)
 plt.rcParams['font.family'] = 'SimHei'
 
@@ -32,6 +32,7 @@ def visualize_keywords(df: pd.DataFrame, png_path: str=None):
         '..',
         'figures/keywords_bar_chart.png'
     ) if png_path is None else png_path
+    
     plt.figure(figsize=(15, 10))
     top_keywords = df.groupby('keyword')['score'].sum().nlargest(40).reset_index()
     plt.barh(top_keywords['keyword'], top_keywords['score'], color='skyblue')
@@ -41,46 +42,9 @@ def visualize_keywords(df: pd.DataFrame, png_path: str=None):
     plt.tight_layout()
     plt.savefig(png_path)
     plt.close()
-    return png_path
-
-def visualize_locations(pro_data: pd.DataFrame, kind='province', png_path: str=None):
-    pro_data = pro_data.head(30)
-    png_path = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)),
-        '..',
-        f'figures/{kind}_bar_chart.png'
-    ) if png_path is None else png_path
-    plt.figure(figsize=(12, 6))
-    plt.barh(pro_data[kind.capitalize()], pro_data['Count'], color='lightgreen')
-    plt.title(f'{kind} 提及频次')
-    plt.xlabel('提及频次')
-    plt.ylabel(kind.capitalize())
-    plt.tight_layout()
-    plt.savefig(png_path)
-    plt.close()
-    return png_path
-
-
-def visualize_word_cloud(df: pd.DataFrame, png_path: str=None):
-    """ 构建关键词词云
-    Args:
-        df: 包含关键词的数据框
-    """
-    png_path = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)),
-        '..',
-        'figures/word_cloud.png'
-    ) if png_path is None else png_path
-    text = ' '.join(df['keyword'])
-    wordcloud = WordCloud(font_path=FONT_PATH, width=800, height=400, background_color='white').generate(text)
     
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.title('Word Cloud')
-    plt.savefig(png_path)
-    plt.close()
     return png_path
+
 
 def visualize_keyword_trend(result_df: pd.DataFrame, top_n: int = 6, png_path: str = None) -> str:
     """可视化出现次数最多的前N个关键词的累积得分趋势。
@@ -97,7 +61,6 @@ def visualize_keyword_trend(result_df: pd.DataFrame, top_n: int = 6, png_path: s
     if result_df.empty:
         print("结果数据框为空，无法进行可视化。")
         return
-    
     # 设置默认PNG路径
     png_path = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
@@ -105,47 +68,114 @@ def visualize_keyword_trend(result_df: pd.DataFrame, top_n: int = 6, png_path: s
         'figures/top_keywords_trend.png'
     ) if png_path is None else png_path
     
+    # 获取最小和最大日期
+    min_date = result_df['date'].min()
+    max_date = result_df['date'].max()
+    # 创建日期范围
+    all_dates = pd.date_range(start=min_date, end=max_date)
     # 统计每个关键词的得分并获取出现次数最多的前N个关键词
     keyword_stats = result_df.groupby('keyword').agg({'score': 'sum', 'date': 'count'}).reset_index()
     keyword_stats.columns = ['keyword', 'total_score', 'count']
     top_keywords = keyword_stats.nlargest(top_n, 'count')['keyword'].tolist()
-
-    # 获取最小和最大日期
-    min_date = result_df['date'].min()
-    max_date = result_df['date'].max()
-
-    # 创建日期范围
-    all_dates = pd.date_range(start=min_date, end=max_date)
-
-    # 创建可视化
-    plt.figure(figsize=(12, 7))
     
+    # 创建可视化
+    plt.figure(figsize=(15, 8))
     for keyword in top_keywords:
         # 过滤数据
         keyword_data = result_df[result_df['keyword'] == keyword]
-        
         # 按日期汇总得分
         keyword_data = (keyword_data.groupby('date')['score']
                         .sum()
                         .reindex(all_dates, fill_value=0)
                         .reset_index(name='score'))
-        
         # 计算累积得分
         keyword_data['cumulative_score'] = keyword_data['score'].cumsum()
         keyword_data.columns = ['date','score', 'cumulative_score']
-        
         # 绘制线图
         plt.plot(keyword_data['date'], keyword_data['cumulative_score'], label=keyword)
-
+    # 设置日期格式为 YY-MM-DD
+    date_format = mdates.DateFormatter('%Y-%m-%d')
+    # 获取当前的坐标轴
+    ax = plt.gca()
+    # 设置主刻度的日期格式
+    ax.xaxis.set_major_formatter(date_format)
+    # 设置日期间隔为每隔 7 天显示一次
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=2))
+    # 如果数据跨度较大，可以自动格式化日期显示：
+    ax.xaxis.set_minor_locator(mdates.AutoDateLocator())
     # 添加标题和标签
-    plt.title(f'Trend of Top {top_n} Most Appeared Keywords', fontsize=16)
+    plt.title(f'{top_n}最佳的新闻联播核心关键词趋势走向', fontsize=16)
     plt.xlabel('日期', fontsize=14)
     plt.ylabel('累积得分', fontsize=14)
+    # 设置日期标签旋转角度
     plt.xticks(rotation=45)
+    # 添加网格线，仅针对 y 轴
     plt.grid(axis='y')
+    # 设置图例并调整图例标题和字体大小
     plt.legend(title='关键词', fontsize=12)
+    # 调整布局以避免标题、标签、图例等重叠
+    plt.tight_layout()
+    # 保存图表
+    plt.savefig(png_path)
+    plt.close()
+    return png_path
 
-    # 调整布局并保存图表
+
+def visualize_word_cloud(df: pd.DataFrame, png_path: str=None):
+    """ 构建关键词词云
+    Args:
+        df: 包含关键词的数据框
+    """
+    png_path = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        '..',
+        'figures/word_cloud.png'
+    ) if png_path is None else png_path
+    
+    try:
+        # 创建关键词与权重的字典，关键词为key，score为value
+        frequencies = dict(zip(df['keyword'], df['score']))
+        # 使用词频生成词云
+        wordcloud = WordCloud(
+            font_path=FONT_PATH, 
+            width=800, 
+            height=400, 
+            background_color='white'
+        ).generate_from_frequencies(frequencies)
+        # 展示词云
+        plt.figure(figsize=(10, 8))
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.axis('off')
+        plt.title('新闻联播关键词词云', fontsize=16)
+
+        # 保存图像
+        plt.savefig(png_path)
+        plt.close()
+
+        return png_path
+    
+    except KeyError as e:
+        print(f"Error: Missing column in DataFrame - {e}")
+        return ""
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return ""
+
+
+def visualize_locations(pro_data: pd.DataFrame, kind='province', png_path: str=None):
+    pro_data = pro_data.head(30)
+    
+    png_path = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        '..',
+        f'figures/{kind}_bar_chart.png'
+    ) if png_path is None else png_path
+    
+    plt.figure(figsize=(12, 8))
+    plt.barh(pro_data[kind.capitalize()], pro_data['Count'], color='lightgreen')
+    plt.title(f'{kind}提及频次')
+    plt.xlabel('提及频次')
+    plt.ylabel(kind.capitalize())
     plt.tight_layout()
     plt.savefig(png_path)
     plt.close()
@@ -170,31 +200,19 @@ def run_visualizations(
     Args:
         file_path: 输入数据的CSV文件路径
     """
-    # if result_data_path is not None and \
-    #     keywords_png_path is not None and \
-    #         top_keywords_trend_png_path is not None and \
-    #             provinces_png_path is not None and \
-    #                 wordcloud_png_path is not None and \
-    #                     os.path.exists(result_data_path) and \
-    #                         os.path.exists(keywords_png_path) and \
-    #                             os.path.exists(top_keywords_trend_png_path) and \
-    #                                 os.path.exists(provinces_png_path) and \
-    #                                     os.path.exists(wordcloud_png_path):
-    #     logger.log_info(f"Visualizations already exist at {result_data_path}, {keywords_png_path}, {provinces_png_path}, {wordcloud_png_path}. Skipping.")
-    #     return pd.read_csv(result_data_path)
-    
     # 初始化关键字分析器
     analyzer = KeywordExtractor(algorithm)
     logger.log_info(f"Keyword extractor initialized; Using {algorithm} algorithm.")
+    # 加载数据
     df = load_data(file_path, date_range)
-    # 按日期分组并聚合标题和内容
-    grouped = df.groupby('date').agg({'title': '\n'.join, 'content': '\n'.join}).reset_index()
     logger.log_info(f"Data loaded from {file_path} between {date_range}")
     
     # 进行关键词分析
     result_data = []
     # 获取当前日期
     current_date = datetime.now()
+    # 按日期分组并聚合标题和内容
+    grouped = df.groupby('date').agg({'title': '\n'.join, 'content': '\n'.join}).reset_index()
     for idx, row in tqdm(grouped.iterrows(), total=len(grouped), desc="Extracting keywords"):
         txt = f'\n'.join(row[fields])
         keywords = analyzer.extract_keywords(txt, n_keywords=n_keywords)
@@ -203,14 +221,20 @@ def run_visualizations(
             age_days = (current_date - row['date']).days / 7
             adjusted_score = score * (1 / (age_days + 1))  # 越新分数越高
             result_data.append({'date': row['date'], 'keyword': keyword, 'score': adjusted_score})
-    
-    logger.log_info(f"Keyword extraction completed.")
     result_df = pd.DataFrame(result_data)
+    logger.log_info(f"Keyword extraction completed.")
+    
     # 关键词可视化
     keywords_png_path = visualize_keywords(result_df, keywords_png_path)
     logger.log_info(f"Keyword visualization saved to {keywords_png_path}")
+    
+    # 关键词趋势可视化
     top_keywords_trend_png_path = visualize_keyword_trend(result_df=result_df, top_n=6, png_path=top_keywords_trend_png_path)
     logger.log_info(f"Top keywords trend visualization saved to {top_keywords_trend_png_path}")
+    
+    # 词云可视化
+    wordcloud_png_path = visualize_word_cloud(result_df, wordcloud_png_path)
+    logger.log_info(f"Word cloud visualization saved to {wordcloud_png_path}")
     
     
     # 省份信息提取与可视化
@@ -219,7 +243,7 @@ def run_visualizations(
     city_data = location_data['city']
     county_data = location_data['county']
     
-    
+    # 词云可视化
     city_png_path = provinces_png_path.replace('province', 'city') if provinces_png_path else None
     county_png_path = provinces_png_path.replace('province', 'county') if provinces_png_path else None
     provinces_png_path = visualize_locations(province_data, kind='province', png_path=provinces_png_path)
@@ -229,20 +253,16 @@ def run_visualizations(
     county_png_path = visualize_locations(county_data, kind='county', png_path=county_png_path)
     logger.log_info(f"County visualization saved to {county_png_path}")
     
-    
+    # 热力图可视化
     province_heatmap_html_path = heatmap_html_path.replace('province', 'province') if heatmap_html_path else None
     city_heatmap_html_path = heatmap_html_path.replace('province', 'city') if heatmap_html_path else None
     county_heatmap_html_path = heatmap_html_path.replace('province', 'county') if heatmap_html_path else None
-    create_heatmap(province_data, 'province', province_heatmap_html_path)
+    province_heatmap_html_path = create_heatmap(province_data, 'province', province_heatmap_html_path)
     logger.log_info(f"Province heatmap saved to {province_heatmap_html_path}")
-    create_heatmap(city_data, 'city', city_heatmap_html_path)
+    city_heatmap_html_path = create_heatmap(city_data, 'city', city_heatmap_html_path)
     logger.log_info(f"City heatmap saved to {city_heatmap_html_path}")
-    create_heatmap(county_data, 'county', county_heatmap_html_path)
+    county_heatmap_html_path = create_heatmap(county_data, 'county', county_heatmap_html_path)
     logger.log_info(f"County heatmap saved to {county_heatmap_html_path}")
-    
-    # 词云可视化
-    wordcloud_png_path = visualize_word_cloud(result_df, wordcloud_png_path)
-    logger.log_info(f"Word cloud visualization saved to {wordcloud_png_path}")
     
     if result_data_path:
         result_df.to_csv(result_data_path, index=False, encoding='utf8')

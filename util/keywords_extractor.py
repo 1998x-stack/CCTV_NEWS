@@ -2,14 +2,12 @@
 import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
-import pke
-import jieba
-import warnings
+import pke, jieba, warnings
 from typing import List, Tuple
 
-warnings.filterwarnings("ignore")
-
 from config.config import BLACKWORDS_ZH_PATH, ALLOWED_WORDS, DISALLOWED_WORDS
+
+warnings.filterwarnings("ignore")
 
 class KeywordExtractor:
     """关键词抽取类，支持 TF-IDF、TextRank 和 YAKE 等算法。
@@ -19,7 +17,7 @@ class KeywordExtractor:
         stopwords: List[str] 停用词列表，用于过滤无关词汇。
     """
 
-    def __init__(self, algorithm: str, stopword_path: str=BLACKWORDS_ZH_PATH):
+    def __init__(self, algorithm: str='textrank', stopword_path: str=BLACKWORDS_ZH_PATH):
         """
         初始化关键词提取器，选择算法并加载停用词。
 
@@ -87,9 +85,6 @@ class KeywordExtractor:
         elif self.algorithm == 'yake':
             keywords = self._extract_yake(processed_text, n_keywords)
         
-        for word, score in keywords:
-            if word in self.stopwords:
-                keywords.remove((word, score))
         keywords = {word.replace(' ', ''): score for word, score in keywords}
         keywords = self.filter_keywords(keywords)
         keywords = {word: score for word, score in keywords.items() if word not in self.stopwords}
@@ -106,7 +101,6 @@ class KeywordExtractor:
             一个新的字典，包含过滤后的关键词及其分数
         """
         filtered_keywords = {}
-
         # 遍历关键词
         for keyword, score in keywords.items():
             # 如果当前关键词已经在过滤后的字典中，更新分数为最高分
@@ -114,7 +108,6 @@ class KeywordExtractor:
                 filtered_keywords[keyword] = score
             else:
                 filtered_keywords[keyword] = max(filtered_keywords[keyword], score)
-
             # 检查是否需要更新其他关键词
             to_remove = []
             for other_keyword in filtered_keywords.keys():
@@ -125,11 +118,9 @@ class KeywordExtractor:
                     elif other_keyword in keyword:
                         # 如果其他关键词是当前关键词的子串
                         filtered_keywords[other_keyword] = max(filtered_keywords.get(other_keyword, 0), score)
-
             for kw in to_remove:
                 if kw in filtered_keywords:
                     del filtered_keywords[kw]
-
         return filtered_keywords
 
     def _extract_tfidf(self, text: str, n_keywords: int) -> List[Tuple[str, float]]:

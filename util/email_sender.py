@@ -2,9 +2,9 @@ import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from typing import List, Optional
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
 from util.log_utils import logger
@@ -58,10 +58,14 @@ class EmailSender:
         if html_attachments:
             for html_file in html_attachments:
                 # Attach the HTML file
-                with open(html_file, 'rb') as file:
-                    attachment = MIMEApplication(file.read(), _subtype='html')
-                    attachment.add_header('Content-Disposition', 'attachment', filename=html_file)
-                    message.attach(attachment)
+                try:
+                    with open(html_file, 'rb') as file:
+                        attachment = MIMEApplication(file.read(), _subtype='html')
+                        attachment.add_header('Content-Disposition', 'attachment', filename=html_file)
+                        message.attach(attachment)
+                    logger.log_info(f"HTML 文件已成功附加: {html_file}")
+                except Exception as e:
+                    logger.log_exception()
                     
         if attachments:
             for filepath in attachments:
@@ -70,6 +74,7 @@ class EmailSender:
                         part = MIMEText(file.read(), 'base64', 'utf-8')
                         part['Content-Disposition'] = f'attachment; filename="{os.path.basename(filepath)}"'
                         message.attach(part)
+                    logger.log_info(f"文件已成功附加: {filepath}")
                 except Exception as e:
                     logger.log_exception()
 

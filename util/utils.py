@@ -1,12 +1,10 @@
-# coding=utf-8
 import sys,os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
-import pandas as pd
 import json, cpca
-import os
-from typing import List, Union, Tuple
+import pandas as pd
 from filelock import FileLock
+from typing import List, Union, Tuple
 
 def csv_to_json(csv_file: str, json_file: str) -> None:
     """
@@ -51,6 +49,7 @@ def csv_to_jsonl(csv_file: str, jsonl_file: str) -> None:
 
     print(f"CSV文件成功转换为JSONL并保存到: {jsonl_file}")
 
+
 def append_to_jsonl(new_data: Union[pd.DataFrame, List[dict]], jsonl_file: str) -> None:
     # TODO: json key 的顺序
     """
@@ -87,6 +86,7 @@ def append_to_jsonl(new_data: Union[pd.DataFrame, List[dict]], jsonl_file: str) 
         except Exception as e:
             print(f"写入JSONL文件时出错: {e}")
 
+
 def append_to_csv(new_data, csv_file: str, header: bool = False, index: bool = False, encoding: str = 'utf-8') -> None:
     if isinstance(new_data, pd.DataFrame):
         df_csv = pd.read_csv(csv_file)
@@ -104,6 +104,7 @@ def append_to_csv(new_data, csv_file: str, header: bool = False, index: bool = F
             print(f"成功将数据追加到CSV文件: {csv_file}")
         except Exception as e:
             print(f"写入CSV文件时出错: {e}")
+
 
 def get_last_jsonl_record_safe(jsonl_file: str) -> dict:
     """
@@ -139,6 +140,7 @@ def get_last_jsonl_record_safe(jsonl_file: str) -> dict:
     
     return last_record
 
+
 def compare_dates(date1: Union[str, int, pd.Timestamp], date2: Union[str, int, pd.Timestamp]) -> str:
     """
     比较两个日期，自动处理不同的数据类型。
@@ -166,7 +168,7 @@ def compare_dates(date1: Union[str, int, pd.Timestamp], date2: Union[str, int, p
         return True
     else:
         return False
-    
+ 
 
 def load_data(file_path: str, date_range: Tuple[Union[str, int, pd.Timestamp], Union[str, int, pd.Timestamp]] = None) -> pd.DataFrame:
     """
@@ -201,6 +203,7 @@ def load_data(file_path: str, date_range: Tuple[Union[str, int, pd.Timestamp], U
     df = df.sort_values(by='date', ascending=False).reset_index(drop=True)
     return df
 
+
 def determine_format(date):
     if isinstance(date, str):
         if '-' in date:
@@ -214,7 +217,8 @@ def determine_format(date):
     elif isinstance(date, pd.Timestamp):
         return ''
     return '%Y%m%d'
-    
+
+
 def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> dict:
     """
     使用cpca提取省、市、县区信息，并统计出现次数。
@@ -227,6 +231,7 @@ def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> 
     texts = data[fields].apply(lambda x: '\n'.join(x), axis=1)
     text_list = texts.tolist()
     text_list = [text.replace('合作', '') for text in text_list]
+    text_list = [text.replace('东方', '') for text in text_list]
     location_data = cpca.transform(texts.tolist())
 
     # 统计省份数量
@@ -239,6 +244,7 @@ def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> 
     city_counts = location_data['市'].value_counts().reset_index()
     city_counts.columns = ['City', 'Count']
     city_counts = city_counts[city_counts['City'] != '市辖区']
+    city_counts = city_counts[city_counts['City']!= '省直辖县级行政区划']
     city_counts.sort_values(by='Count', ascending=False, inplace=True)
     city_counts.reset_index(drop=True, inplace=True)
 
@@ -256,3 +262,4 @@ def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> 
         'city': city_counts,
         'county': county_counts
     }
+
