@@ -11,8 +11,7 @@ PROXIES = {
 EMAIL_ADDRESS = os.environ['EMAIL_ADDRESS'] if 'EMAIL_ADDRESS' in os.environ else ''
 EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD'] if 'EMAIL_PASSWORD' in os.environ else ''
 TO_EMAILS = os.environ['TO_EMAILS'] if 'TO_EMAILS' in os.environ else ''
-TO_EMAILS = TO_EMAILS.split(',')
-TO_EMAILS += ['1193309730@qq.com']
+TO_EMAILS = TO_EMAILS.strip(',').split(',')
 
 
 BASIC_IMAGE_DIR = os.path.join(

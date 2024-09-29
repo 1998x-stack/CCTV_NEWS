@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 1 * * *'   # 每天 UTC 时间 1:00 触发工作流，等同于北京时间早上 9:00
-    - cron: '40 11 * * *'  # 每天 UTC 时间 11:40 触发工作流，等同于北京时间晚上 7:40
+    - cron: '00 12 * * *'  # 每天 UTC 时间 11:40 触发工作流，等同于北京时间晚上 7:40
 
 # 工作流
 jobs:
@@ -39,7 +39,7 @@ jobs:
       # 第五步：运行 Python 脚本并传递环境变量
       - name: Run Python Script
         env:
-          PROXY: ${{ secrets.PROXY }}  # 引用 GitHub 密钥 PROXIES
+          PROXY: ${{ secrets.PROXY }}  # 引用 GitHub 密钥 PROXIY
           EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}  # 引用 GitHub 密钥 EMAIL_ADDRESS
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}  # 引用 GitHub 密钥 EMAIL_PASSWORD
           TO_EMAILS: ${{ secrets.TO_EMAILS }}  # 引用 GitHub 密钥 TO_EMAILS
