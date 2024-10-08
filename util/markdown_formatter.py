@@ -4,7 +4,6 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 import markdown
 from typing import List, Dict
 from datetime import datetime
-from src.news_collect_for_today import collect_news
 
 class MarkdownFormatter:
     """用于将新闻数据格式化为 Markdown 格式的类。"""
@@ -46,6 +45,7 @@ class MarkdownFormatter:
     
 if __name__ == '__main__':
     today = datetime.now().strftime("%Y%m%d")
-    collected_data = collect_news(today)
+    from src.news_collect_for_today import collect_daily_news
+    collected_data = collect_daily_news(today)
     markdown_content = MarkdownFormatter.format_news(collected_data)
     print(markdown_content)
