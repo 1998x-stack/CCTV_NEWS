@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from util.log_utils import logger
-from util.utils import determine_format
+from util.utils import determine_date_format
 
 class VideoDataCollector:
     def __init__(self, start_date: str, end_date: str, proxies: Dict[str, str]):
@@ -21,8 +21,8 @@ class VideoDataCollector:
         :param end_date: 结束日期，格式为 "YYYYMMDD" 等
         :param proxies: 代理设置字典
         """
-        start_date_format = determine_format(start_date)
-        end_date_format = determine_format(end_date)
+        start_date_format = determine_date_format(start_date)
+        end_date_format = determine_date_format(end_date)
         self.start_date = datetime.strptime(start_date, start_date_format) if start_date else datetime.now()
         self.end_date = datetime.strptime(end_date, end_date_format) if end_date else datetime.now()
         self.proxies = proxies
@@ -127,7 +127,7 @@ class VideoDataCollector:
     
     def convert_date(self, date) -> str:
         date_str = str(date)
-        return pd.to_datetime(date_str, errors='coerce', format=determine_format(date_str)).strftime("%Y-%m-%d")
+        return pd.to_datetime(date_str, errors='coerce', format=determine_date_format(date_str)).strftime("%Y-%m-%d")
     
     def save_to_json(self, data: List[Dict[str, Any]], filename: str) -> None:
         """

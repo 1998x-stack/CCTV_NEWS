@@ -18,7 +18,7 @@ from config.config import FONT_PATH, DATA_CSV_PATH
 from util.log_utils import logger
 from util.news_heatmap import create_heatmap
 from util.keywords_extractor import KeywordExtractor
-from util.utils import load_and_filter_data, extract_location_counts
+from util.utils import load_data, extract_location_counts
 
 warnings.filterwarnings("ignore")
 font_manager.fontManager.addfont(FONT_PATH)
@@ -226,7 +226,7 @@ def run_visualizations(
     analyzer = KeywordExtractor(algorithm)
     logger.log_info(f"Keyword extractor initialized; Using {algorithm} algorithm.")
     
-    df = load_and_filter_data(file_path, date_range)
+    df = load_data(file_path, date_range)
     logger.log_info(f"Data loaded from {file_path} between {date_range}")
     
     result_data = []
