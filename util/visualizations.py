@@ -94,6 +94,7 @@ def visualize_keyword_trend(result_df: pd.DataFrame, top_n: int = 6, png_path: O
                         .reindex(all_dates, fill_value=0)
                         .reset_index(name='score'))
         keyword_data['cumulative_score'] = keyword_data['score'].cumsum()
+        keyword_data.columns = ['date', 'score', 'cumulative_score']
         plt.plot(keyword_data['date'], keyword_data['cumulative_score'], label=keyword)
     
     ax = plt.gca()
