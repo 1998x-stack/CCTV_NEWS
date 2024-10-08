@@ -4,9 +4,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
 
 import pke, jieba, warnings
 from typing import List, Tuple
-
 from config.config import BLACKWORDS_ZH_PATH, ALLOWED_WORDS, DISALLOWED_WORDS
-
 warnings.filterwarnings("ignore")
 
 class KeywordExtractor:

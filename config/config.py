@@ -56,12 +56,12 @@ DATA_JSONL_PATH = os.path.join(
     '..',
     'data/data.jsonl'
 )
-Domestic_Broadcast_News_CSV_PATH = os.path.join(
+DOMESTIC_BROADCAST_NEWS_CSV_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
     '..',
     'data/Domestic_Broadcast_News.csv'
 )
-Domestic_Broadcast_News_JSONL_PATH = os.path.join(
+DOMESTIC_BROADCAST_NEWS_JSONL_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
     '..',
     'data/Domestic_Broadcast_News.jsonl'

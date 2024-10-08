@@ -47,7 +47,7 @@ class Log:
             pprint(message)
 
         message += '\n'
-        file_name = os.path.join(self.dir_name, time.strftime("%Y-%m-%d-%H", time.localtime()) + '.log')
+        file_name = os.path.join(self.dir_name, time.strftime("%Y-%m-%d", time.localtime()) + '.log')
         try:
             # 锁定资源，防止多线程问题
             lock = threading.Lock()

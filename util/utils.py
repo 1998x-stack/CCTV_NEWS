@@ -1,210 +1,203 @@
-import sys,os
+import sys
+import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
+import json
+from typing import List, Union, Tuple, Dict, Optional
 
-import json, cpca
 import pandas as pd
+import cpca
 from filelock import FileLock
-from typing import List, Union, Tuple
+
+
 
 def csv_to_json(csv_file: str, json_file: str) -> None:
     """
-    将CSV文件转换为JSON格式，并保存到指定路径。
-    
+    Convert a CSV file to JSON format and save it to the specified path.
+
     Args:
-        csv_file (str): 输入的CSV文件路径
-        json_file (str): 输出的JSON文件路径
-    
-    示例:
+        csv_file (str): Path to the input CSV file.
+        json_file (str): Path to save the output JSON file.
+
+    Example:
         csv_to_json('data.csv', 'output.json')
     """
-    # 读取CSV文件为DataFrame
     df = pd.read_csv(csv_file)
-    
-    # 将DataFrame转换为JSON格式并写入文件
     df.to_json(json_file, orient='records', force_ascii=False, indent=4)
+    print(f"CSV file successfully converted to JSON and saved to: {json_file}")
 
-    print(f"CSV文件成功转换为JSON并保存到: {json_file}")
-    
 
 def csv_to_jsonl(csv_file: str, jsonl_file: str) -> None:
     """
-    将CSV文件转换为JSONL格式，并保存到指定路径。
-    
+    Convert a CSV file to JSONL format and save it to the specified path.
+
     Args:
-        csv_file (str): 输入的CSV文件路径
-        jsonl_file (str): 输出的JSONL文件路径
-    
-    示例:
+        csv_file (str): Path to the input CSV file.
+        jsonl_file (str): Path to save the output JSONL file.
+
+    Example:
         csv_to_jsonl('data.csv', 'output.jsonl')
     """
-    # 读取CSV文件为DataFrame
     df = pd.read_csv(csv_file)
-    
-    # 打开JSONL文件进行写入
     with open(jsonl_file, 'w', encoding='utf-8') as f:
-        # 逐行将DataFrame转换为JSON格式并写入文件
         for record in df.to_dict(orient='records'):
-            json_record = json.dumps(record, ensure_ascii=False)  # 转换为合法的JSON格式
+            json_record = json.dumps(record, ensure_ascii=False)
             f.write(f"{json_record}\n")
+    print(f"CSV file successfully converted to JSONL and saved to: {jsonl_file}")
 
-    print(f"CSV文件成功转换为JSONL并保存到: {jsonl_file}")
 
-
-def append_to_jsonl(new_data: Union[pd.DataFrame, List[dict]], jsonl_file: str) -> None:
-    # TODO: json key 的顺序
+def append_to_jsonl(new_data: Union[pd.DataFrame, List[Dict]], jsonl_file: str) -> None:
     """
-    将新的数据追加到已有的JSONL文件中。
-    
+    Append new data to an existing JSONL file.
+
     Args:
-        new_data (pd.DataFrame or list[dict]): 要追加的数据，格式为DataFrame或字典列表
-        jsonl_file (str): 要追加数据的JSONL文件路径
-    
-    示例:
+        new_data (Union[pd.DataFrame, List[Dict]]): Data to append, either as a DataFrame or a list of dictionaries.
+        jsonl_file (str): Path to the JSONL file to append data to.
+
+    Example:
         new_data = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}]
         append_to_jsonl(new_data, 'output.jsonl')
     """
-    # 判断输入的数据类型
     if isinstance(new_data, pd.DataFrame):
-        # 如果是DataFrame，将其转换为字典列表
         records = new_data.to_dict(orient='records')
     elif isinstance(new_data, list) and all(isinstance(item, dict) for item in new_data):
-        # 如果是字典列表，直接使用
         records = new_data
     else:
-        raise ValueError("new_data 必须是 DataFrame 或者字典列表")
-    
-    # 文件锁，防止并发写入冲突
+        raise ValueError("new_data must be a DataFrame or a list of dictionaries")
+
     lock_file = jsonl_file + '.lock'
     with FileLock(lock_file):
         try:
-            # 以追加模式打开JSONL文件
             with open(jsonl_file, 'a', encoding='utf-8') as f:
-                # 逐行将字典写入JSONL文件
                 for record in records:
                     f.write(json.dumps(record, ensure_ascii=False) + '\n')
-            print(f"成功将数据追加到JSONL文件: {jsonl_file}")
+            print(f"Successfully appended data to JSONL file: {jsonl_file}")
         except Exception as e:
-            print(f"写入JSONL文件时出错: {e}")
+            print(f"Error writing to JSONL file: {e}")
 
 
-def append_to_csv(new_data, csv_file: str, header: bool = False, index: bool = False, encoding: str = 'utf-8') -> None:
+def append_to_csv(new_data: Union[pd.DataFrame, List[Dict]], csv_file: str, header: bool = False, index: bool = False, encoding: str = 'utf-8') -> None:
+    """
+    Append new data to an existing CSV file.
+
+    Args:
+        new_data (Union[pd.DataFrame, List[Dict]]): Data to append, either as a DataFrame or a list of dictionaries.
+        csv_file (str): Path to the CSV file to append data to.
+        header (bool, optional): Whether to write the header. Defaults to False.
+        index (bool, optional): Whether to write row index. Defaults to False.
+        encoding (str, optional): File encoding. Defaults to 'utf-8'.
+    """
+    df_csv = pd.read_csv(csv_file)
     if isinstance(new_data, pd.DataFrame):
-        df_csv = pd.read_csv(csv_file)
-        new_data = new_data[df_csv.columns] # 确保列顺序一致
+        new_data = new_data[df_csv.columns]  # Ensure column order consistency
     elif isinstance(new_data, list) and all(isinstance(item, dict) for item in new_data):
-        df_csv = pd.read_csv(csv_file)
-        new_data = pd.DataFrame(new_data)
-        new_data = new_data[df_csv.columns] # 确保列顺序一致
-    # 文件锁，防止并发写入冲突
+        new_data = pd.DataFrame(new_data)[df_csv.columns]  # Ensure column order consistency
+    else:
+        raise ValueError("new_data must be a DataFrame or a list of dictionaries")
+
     lock_file = csv_file + '.lock'
     with FileLock(lock_file):
         try:
-            # 以追加模式将DataFrame写入CSV文件
             new_data.to_csv(csv_file, mode='a', header=header, index=index, encoding=encoding)
-            print(f"成功将数据追加到CSV文件: {csv_file}")
+            print(f"Successfully appended data to CSV file: {csv_file}")
         except Exception as e:
-            print(f"写入CSV文件时出错: {e}")
+            print(f"Error writing to CSV file: {e}")
 
 
-def get_last_jsonl_record_safe(jsonl_file: str) -> dict:
+def get_last_jsonl_record_safe(jsonl_file: str) -> Optional[Dict]:
     """
-    获取JSONL文件中的最后一条有效记录，忽略格式错误的行。
-    
+    Get the last valid record from a JSONL file, ignoring malformed lines.
+
     Args:
-        jsonl_file (str): JSONL文件路径
-    
+        jsonl_file (str): Path to the JSONL file.
+
     Returns:
-        dict: 最后一条有效的JSON记录
-    
-    示例:
+        Optional[Dict]: The last valid JSON record, or None if no valid records found.
+
+    Example:
         last_record = get_last_jsonl_record_safe('data.jsonl')
         print(last_record)
     """
     last_record = None
-    
-    # 打开JSONL文件，逐行读取
     with open(jsonl_file, 'r', encoding='utf-8') as f:
         for line_num, line in enumerate(f, 1):
             try:
-                # 尝试将每行转换为字典
                 last_record = json.loads(line.strip())
             except json.JSONDecodeError as e:
-                # 捕捉JSON解析错误，并输出问题行号和内容
-                print(f"在第 {line_num} 行解析JSON失败: {line.strip()}")
-                print(f"错误信息: {e}")
-    
+                print(f"Failed to parse JSON on line {line_num}: {line.strip()}")
+                print(f"Error message: {e}")
+
     if last_record:
-        print(f"最后一条有效记录: {last_record}")
+        print(f"Last valid record: {last_record}")
     else:
-        print("未找到有效的JSON记录")
-    
+        print("No valid JSON records found")
+
     return last_record
 
 
-def compare_dates(date1: Union[str, int, pd.Timestamp], date2: Union[str, int, pd.Timestamp]) -> str:
+def compare_dates(date1: Union[str, int, pd.Timestamp], date2: Union[str, int, pd.Timestamp]) -> bool:
     """
-    比较两个日期，自动处理不同的数据类型。
-    
+    Compare two dates, automatically handling different data types.
+
     Args:
-        date1 (Union[str, int, pd.Timestamp]): 第一个日期，可能是字符串、整数或 pandas 的 Timestamp。
-        date2 (Union[str, int, pd.Timestamp]): 第二个日期，可能是字符串、整数或 pandas 的 Timestamp。
-    
+        date1 (Union[str, int, pd.Timestamp]): The first date.
+        date2 (Union[str, int, pd.Timestamp]): The second date.
+
     Returns:
-        str: 比较结果，返回 'date1 is earlier', 'date1 is later', 或 'date1 is equal to date2'
-    
-    示例:
+        bool: True if date1 is later than date2, False otherwise.
+
+    Example:
         result = compare_dates('2023-09-25', '2023-09-27')
-        print(result)  # 输出: date1 is earlier
+        print(result)  # Output: False
     """
-    # 转换 date1 和 date2 为 datetime 类型
     try:
         date1_dt = pd.to_datetime(date1)
         date2_dt = pd.to_datetime(date2)
     except Exception as e:
-        return f"Error in converting dates: {e}"
-    
-    # 比较日期
-    if date1_dt > date2_dt:
-        return True
-    else:
-        return False
- 
+        raise ValueError(f"Error in converting dates: {e}")
 
-def load_data(file_path: str, date_range: Tuple[Union[str, int, pd.Timestamp], Union[str, int, pd.Timestamp]] = None) -> pd.DataFrame:
+    return date1_dt > date2_dt
+
+
+def load_data(file_path: str, date_range: Optional[Tuple[Union[str, int, pd.Timestamp], Union[str, int, pd.Timestamp]]] = None) -> pd.DataFrame:
     """
-    加载CSV数据，并根据给定的日期范围过滤数据。
-    
+    Load CSV data and filter it based on the given date range.
+
     Args:
-        file_path (str): 文件路径
-        date_range (Tuple[Union[str, int, pd.Timestamp], Union[str, int, pd.Timestamp]]): 日期范围，用于过滤数据
-    
+        file_path (str): Path to the CSV file.
+        date_range (Optional[Tuple[Union[str, int, pd.Timestamp], Union[str, int, pd.Timestamp]]]): Date range for filtering data.
+
     Returns:
-        pd.DataFrame: 包含非空内容且在日期范围内的数据框
+        pd.DataFrame: DataFrame containing non-empty content within the specified date range.
     """
-    # 读取CSV文件
     df = pd.read_csv(file_path, encoding='utf8')
-    # 确保 'date' 列是 datetime 类型
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
-    # 过滤掉内容为空的数据
     df = df[df['content'].notnull()]
+
     if date_range:
-        # 处理 date_range 元组，转换为 datetime 格式
         try:
-            start_date = pd.to_datetime(date_range[0], errors='coerce', format=determine_format(date_range[0]))  # 起始日期
-            end_date = pd.to_datetime(date_range[1], errors='coerce', format=determine_format(date_range[1]))    # 结束日期
+            start_date = pd.to_datetime(date_range[0], errors='coerce', format=determine_date_format(date_range[0]))
+            end_date = pd.to_datetime(date_range[1], errors='coerce', format=determine_date_format(date_range[1]))
         except Exception as e:
-            raise ValueError(f"日期范围转换错误: {e}")
-        # 检查是否有无效日期
+            raise ValueError(f"Error in date range conversion: {e}")
+
         if pd.isnull(start_date) or pd.isnull(end_date):
-            raise ValueError("日期范围无效，请提供有效的日期格式")
-        # 根据日期范围过滤数据
+            raise ValueError("Invalid date range, please provide valid date formats")
+
         df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
-        # 按日期降序排列并重置索引
-    df = df.sort_values(by='date', ascending=False).reset_index(drop=True)
-    return df
+
+    return df.sort_values(by='date', ascending=False).reset_index(drop=True)
 
 
-def determine_format(date):
+def determine_date_format(date: Union[str, int, pd.Timestamp]) -> str:
+    """
+    Determine the format of a given date.
+
+    Args:
+        date (Union[str, int, pd.Timestamp]): The date to determine the format for.
+
+    Returns:
+        str: The determined date format.
+    """
     if isinstance(date, str):
         if '-' in date:
             return '%Y-%m-%d'
@@ -219,43 +212,24 @@ def determine_format(date):
     return '%Y%m%d'
 
 
-def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> dict:
+def extract_location_counts(data: pd.DataFrame, fields: List[str] = ['title', 'content']) -> Dict[str, pd.DataFrame]:
     """
-    使用cpca提取省、市、县区信息，并统计出现次数。
+    Extract and count location information from the given data using cpca.
+
     Args:
-        data: 包含文本内容的数据框。
-        fields: 要提取的文本字段列表。
+        data (pd.DataFrame): DataFrame containing text content.
+        fields (List[str], optional): List of text fields to extract from. Defaults to ['title', 'content'].
+
     Returns:
-        包含省、市、县区统计结果的字典。
+        Dict[str, pd.DataFrame]: Dictionary containing count results for provinces, cities, and counties.
     """
     texts = data[fields].apply(lambda x: '\n'.join(x), axis=1)
-    text_list = texts.tolist()
-    text_list = [text.replace('合作', '') for text in text_list]
-    text_list = [text.replace('东方', '') for text in text_list]
-    location_data = cpca.transform(texts.tolist())
+    text_list = [text.replace('合作', '').replace('东方', '') for text in texts]
+    location_data = cpca.transform(text_list)
 
-    # 统计省份数量
-    province_counts = location_data['省'].value_counts().reset_index()
-    province_counts.columns = ['Province', 'Count']
-    province_counts.sort_values(by='Count', ascending=False, inplace=True)
-    province_counts.reset_index(drop=True, inplace=True)
-
-    # 统计城市数量
-    city_counts = location_data['市'].value_counts().reset_index()
-    city_counts.columns = ['City', 'Count']
-    city_counts = city_counts[city_counts['City'] != '市辖区']
-    city_counts = city_counts[city_counts['City']!= '省直辖县级行政区划']
-    city_counts.sort_values(by='Count', ascending=False, inplace=True)
-    city_counts.reset_index(drop=True, inplace=True)
-
-    # 统计县区数量
-    county_counts = location_data['区'].value_counts().reset_index()
-    county_counts.columns = ['County', 'Count']
-    county_counts = county_counts[county_counts['County'] != '郊区']
-    county_counts = county_counts[county_counts['County'] != '市辖区']
-    county_counts = county_counts[county_counts['County'] != '合作市']
-    county_counts.sort_values(by='Count', ascending=False, inplace=True)
-    county_counts.reset_index(drop=True, inplace=True)
+    province_counts = process_location_counts(location_data['省'], 'Province')
+    city_counts = process_location_counts(location_data['市'], 'City', ['市辖区', '省直辖县级行政区划'])
+    county_counts = process_location_counts(location_data['区'], 'County', ['郊区', '市辖区', '合作市'])
 
     return {
         'province': province_counts,
@@ -263,3 +237,21 @@ def extract_location_counts(data: pd.DataFrame, fields=['title', 'content']) -> 
         'county': county_counts
     }
 
+
+def process_location_counts(series: pd.Series, column_name: str, exclude: List[str] = None) -> pd.DataFrame:
+    """
+    Process and count locations from a pandas Series.
+
+    Args:
+        series (pd.Series): Series containing location data.
+        column_name (str): Name for the location column.
+        exclude (List[str], optional): List of locations to exclude. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Processed and sorted location counts.
+    """
+    counts = series.value_counts().reset_index()
+    counts.columns = [column_name, 'Count']
+    if exclude:
+        counts = counts[~counts[column_name].isin(exclude)]
+    return counts.sort_values(by='Count', ascending=False).reset_index(drop=True)
